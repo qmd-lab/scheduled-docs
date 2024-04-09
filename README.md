@@ -64,7 +64,7 @@ Things to try:
 1. Run `quarto preview` and see how only the first of three posts are visible on the site.
 2. Set `draft-after: "1/4/24"` in `_quarto.yml` and re-render to see how now the first two of the three posts are visible.
 3. Set `draft-after: "system-time"` in `_quarto.yml` and re-render to see how now all three documents are visible. This is because the system time on any computer now will be after 1/5/24.
-4. With `draft-after: "system-time" add a draft value to the second post as follows:
+4. With `draft-after: "system-time"` add a draft value to the second post as follows:
    
    ```yaml
    docs:
