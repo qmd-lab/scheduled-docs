@@ -5,14 +5,17 @@ project:
   post-render:
     - "_extensions/scheduled-docs/rm-draftlist.ts"
 
-metadata-files: 
+metadata-files:
   - "scheduled-docs_files/draft-list.yml"
 
+# this approach to triggering the functionality does not work
+# metadata-files: 
+#   - "_extensions/scheduled-docs/scheduled-docs.yml"
+
 website:
-  title: "."
+  title: "scheduled-docs"
   navbar:
     right:
-      - about.qmd
       - icon: github
         href: https://github.com/
       - icon: twitter
@@ -23,27 +26,32 @@ format:
 
 scheduled-docs:
   debug: true
-  draft-after: "1/2/24" # can also manually set datetime using format "1/20/24"
+  draft-after: "1/2/24" # can use "system-time" or manually set datetime using format "1/2/24"
   timezone: "-07:00" # GMT offset in +/-hh:mm does not adjust for daylight savings
   docs:
-    - href: posts/post-with-code/index.qmd
+    - href: "posts/post-1.qmd"
       date: 1/1/24
-    - href: posts/welcome/index.qmd
+    - href: "posts/post-2.qmd"
       date: 1/3/24
-      
+    - href: "posts/post-3.qmd"
+      date: 1/5/24
+
+# alternative structure showing the `docs:` can be nested anywhere in `scheduled-docs`:
 # scheduled-docs:
-#   draft-after: "1/2/24" # can also manually set datetime using format "1/20/24"
+#   draft-after: "1/4/24" # can use "system-time" or manually set datetime using format "1/2/24"
 #   timezone: "-07:00" # GMT offset in +/-hh:mm does not adjust for daylight savings
 #   units:
-#     - type: the first
+#     - type: Part A
 #       docs:
-#         - href: posts/post-with-code/index.qmd
+#         - href: "posts/post-1.qmd"
 #           date: 1/1/24
-#     - type: the second
+#     - type: Part B
 #       mods:
 #         docs:
-#           - href: posts/welcome/index.qmd
+#           - href: "posts/post-2.qmd"
 #             date: 1/3/24
+#           - href: "posts/post-3.qmd"
+#             date: 1/5/24
 
 
 
