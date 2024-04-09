@@ -25,7 +25,6 @@ format:
     theme: cosmo
 
 scheduled-docs:
-  debug: true
   draft-after: "1/2/24" # can use "system-time" or manually set datetime using format "1/2/24"
   timezone: "-07:00" # GMT offset in +/-hh:mm does not adjust for daylight savings
   docs:
