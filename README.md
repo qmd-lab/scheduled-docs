@@ -19,9 +19,9 @@ To use this extension, start by adding the following three fields to your `_quar
 project:
   type: website
   pre-render:                                         # add
-    - "_extensions/scheduled-docs/write-draftlist.ts" # all
+    - "_extensions/qmd-lab/scheduled-docs/write-draftlist.ts" # all
   post-render:                                        # of
-    - "_extensions/scheduled-docs/rm-draftlist.ts"    # these
+    - "_extensions/qmd-lab/scheduled-docs/rm-draftlist.ts"    # these
 metadata-files:                                       # lines
   - "scheduled-docs_files/draft-list.yml"             # please
 ```
