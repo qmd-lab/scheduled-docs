@@ -1,0 +1,6 @@
+---
+title: "Post 3"
+author: Harlow Malloc
+---
+
+This is the third and final post in the sequence.
