@@ -1,0 +1,49 @@
+project:
+  type: website
+  pre-render:
+    - "_extensions/scheduled-docs/write-draftlist.ts"
+  post-render:
+    - "_extensions/scheduled-docs/rm-draftlist.ts"
+
+metadata-files: 
+  - "scheduled-docs_files/draft-list.yml"
+
+website:
+  title: "."
+  navbar:
+    right:
+      - about.qmd
+      - icon: github
+        href: https://github.com/
+      - icon: twitter
+        href: https://twitter.com
+format:
+  html:
+    theme: cosmo
+
+scheduled-docs:
+  debug: true
+  draft-after: "1/2/24" # can also manually set datetime using format "1/20/24"
+  timezone: "-07:00" # GMT offset in +/-hh:mm does not adjust for daylight savings
+  docs:
+    - href: posts/post-with-code/index.qmd
+      date: 1/1/24
+    - href: posts/welcome/index.qmd
+      date: 1/3/24
+      
+# scheduled-docs:
+#   draft-after: "1/2/24" # can also manually set datetime using format "1/20/24"
+#   timezone: "-07:00" # GMT offset in +/-hh:mm does not adjust for daylight savings
+#   units:
+#     - type: the first
+#       docs:
+#         - href: posts/post-with-code/index.qmd
+#           date: 1/1/24
+#     - type: the second
+#       mods:
+#         docs:
+#           - href: posts/welcome/index.qmd
+#             date: 1/3/24
+
+
+
