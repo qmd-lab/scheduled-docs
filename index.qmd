@@ -1,6 +1,6 @@
 ---
-title: "Scheduled Posts Example"
 listing:
+  id: "posts"
   contents: posts
   sort: "date desc"
   type: default
@@ -11,4 +11,9 @@ page-layout: full
 title-block-banner: true
 ---
 
+This website demonstrates the functionality of `scheduled-docs`. Any documents with a date that is in the future will be set to `draft: true` and not appear in the listing below nor be accessible in search.
 
+Change the `scheduled-docs:draft-after` field in `_quarto.yml` and re-render to experiment with the behavior.
+
+:::{#posts}
+:::
