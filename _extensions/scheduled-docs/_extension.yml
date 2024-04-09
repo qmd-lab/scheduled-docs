@@ -11,4 +11,4 @@ contributes:
       post-render:
         - rm-draftlist.ts
     metadata-files:
-      - scheduled-docs_files/draftlist.yml
+      - "scheduled-docs_files/draft-list.yml"
