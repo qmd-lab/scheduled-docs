@@ -8,12 +8,12 @@ This set of scripts allows you to schedule the rendering of documents within a Q
 quarto add qmd-lab/scheduled-docs
 ```
 
-This will install the extension under the `_extensions` subdirectory.
+This will install the scripts under the `_extensions` subdirectory.
 If you're using version control, you will want to check in this directory.
 
 ## Using
 
-To use this extension, you must add the following three fields to your `_quarto.yml` file.
+To use this extension, start by adding the following three fields to your `_quarto.yml` file.
 
 ```yaml
 project:
@@ -25,7 +25,7 @@ project:
 metadata-files:                                       # lines
   - "scheduled-docs_files/draft-list.yml"             # please
 ```
-Once you've done that, you can now add a new key called `scheduled-docs` to your `_quarto.yml` where you can list the documents that you would like to schedule along with parameters that determine when they should be rendered.
+Once you've done that, you can now add a new key called `scheduled-docs` to your `_quarto.yml` where you can list the documents that you would like to schedule along with parameters that determine when they should be rendered. For example:
 
 ```yaml
 # somewhere in your _quarto.yml ...
@@ -43,7 +43,7 @@ The three keys recognized under `scheduled-docs` are:
 
 - `draft-after`: can take values either `system-time` or a fixed date in MM/DD/YY format like `1/2/24`. All .qmd files under a `docs` key with a `date` that is in the future relative to `draft-after` will be set to `draft: true`.
 - `timezone`: the offset from GMT in +/-hh:mm. Currently this does not adjust for daylight savings.
-- `docs`: an array of items where each one contains at least and `href` and `date` key. There is considerable flexibility in how these arrays are structured; see the example.
+- `docs`: an array of items where each one contains at least an `href` and `date` key. There is considerable flexibility in how you can structure these arrays; see the example.
 
 ## How it works
 
@@ -53,7 +53,7 @@ The post-render script cleans things up by removing the `scheduled-docs_files` d
 
 ## Example
 
-This repository contains an example template of a website that implements `scheduled-docs`. You can inspect `_quarto.yml` here or install the template using:
+This repository contains an example template of a website that implements `scheduled-docs`. You can install the template using:
 
 ```bash
 quarto use template qmd-lab/scheduled-docs
@@ -64,7 +64,7 @@ Things to try:
 1. Run `quarto preview` and see how only the first of three posts are visible on the site.
 2. Set `draft-after: "1/4/24"` in `_quarto.yml` and re-render to see how now the first two of the three posts are visible.
 3. Set `draft-after: "system-time"` in `_quarto.yml` and re-render to see how now all three documents are visible. This is because the system time on any computer now will be after 1/5/24.
-4. With `draft-after: "system-time" add a draft value key to the second post as follows:
+4. With `draft-after: "system-time" add a draft value to the second post as follows:
    
    ```yaml
    docs:
