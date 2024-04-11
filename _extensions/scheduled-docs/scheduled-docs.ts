@@ -2,21 +2,54 @@
 import { parse, stringify } from "https://deno.land/std/yaml/mod.ts";
 import { join } from "https://deno.land/std/path/mod.ts";
 
-// ---------------------------- //
-//     Function definitions     //
-// ---------------------------- //
+
+
+// -------------------------- //
+//     Propagate Meta Data    //
+// -------------------------- //
+// Propagate the unignored keys into nested objects, being sure to not overwrite
+// any keys of the same name.
+
+export function propagateKeys(obj: any, parentProps: Record<string, string> = {}, ignoreKeys = ['debug', 'draft-after', 'timezone', 'this-week']) {
+    if (Array.isArray(obj)) {
+        obj.forEach(item => {
+            if (typeof item === 'object' && item !== null) {
+                propagateKeys(item, parentProps, ignoreKeys);
+            }
+        });
+    } else if (typeof obj === 'object' && obj !== null) {
+        const newProps = { ...parentProps };
+        
+        Object.keys(obj).forEach(key => {
+            if (!ignoreKeys.includes(key)) {
+                if (typeof obj[key] === 'string') {
+                    newProps[key] = obj[key];
+                } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                    propagateKeys(obj[key], newProps, ignoreKeys);
+                }
+            }
+        });
+
+        Object.keys(newProps).forEach(key => {
+            if (obj[key] === undefined) {
+                obj[key] = newProps[key];
+            }
+        });
+    }
+}
+
 
 // ------------------------ //
 //     Process Schedule     //
 // ------------------------ //
 // Set draft values for all items and collects them
 // into a doclist key in the config file
-export async function processSchedule(config: any, configKey: string = "scheduled-docs", itemsKey: string = "docs") {
+
+export function processSchedule(obj, itemsKey: string = "docs") {
   
-  console.log("=== Scheduled-docs ===")
   console.log("> Processing schedule ...")
-  const draftAfterStr = config[configKey]["draft-after"];
-  const timezone = config[configKey]["timezone"];
+  const draftAfterStr = obj["draft-after"];
+  const timezone = obj["timezone"];
   
   let thresholdDate = new Date(0);
   if (draftAfterStr === "system-time") {
@@ -25,12 +58,11 @@ export async function processSchedule(config: any, configKey: string = "schedule
       thresholdDate = new Date(convertDateToISOFormat(draftAfterStr, timezone));
   }
   
-  // Initialize empty object and counters
   let collectedItems = []
   let nDrafts = 0;
   let nNotDrafts = 0;
   
-  // Recursively process the config object an apply getDraftVal to all items
+  // recursively process the config object and apply getDraftVal to all items
   function processItemsKeys(element: any) {
     if (typeof element === 'object' && element !== null) {
       if (Array.isArray(element[itemsKey])) {
@@ -46,7 +78,7 @@ export async function processSchedule(config: any, configKey: string = "schedule
           }
         });
       }
-      // Recursively process each property if it's an object or array
+      // recurse if it's an object
       Object.entries(element).forEach(([key, value]) => {
         if (typeof value === 'object') {
           processItemsKeys(value);
@@ -55,7 +87,7 @@ export async function processSchedule(config: any, configKey: string = "schedule
     }
   }
   
-  // Get draft values for each item
+  // get draft values for each item
   function getDraftVal(item: any, thresholdDate: Date, timezone: string): boolean {
     // default to false
     let draftValue = false;
@@ -72,19 +104,16 @@ export async function processSchedule(config: any, configKey: string = "schedule
     return draftValue;
   }
   
-  // Process all 
-  if (config[configKey]) {
-    processItemsKeys(config[configKey]);
-  }
+  // run recursive function
+  processItemsKeys(obj);
   
   // append collected docs for easy downstream processing
-  config[configKey].doclist = collectedItems;
+  obj.doclist = collectedItems;
   
   console.log(`  - ${nDrafts} items set to 'draft: true'.`);
   console.log(`  - ${nNotDrafts} items set to 'draft: false'.`);
 
-  
-  return config;
+  //return config;
 }
 
 
@@ -92,11 +121,12 @@ export async function processSchedule(config: any, configKey: string = "schedule
 //     Write Draft List     //
 // ------------------------ //
 // Write a draft list yaml file from doclist
-export async function writeDraftList(config: any, configKey: string = "scheduled-docs", tempFilesDir: string) {
+
+export async function writeDraftList(obj: any, tempFilesDir: string) {
   console.log("> Making draft list ...")
   const draftHrefs: string[] = [];
   
-  config[configKey].doclist?.forEach((item: any) => {
+  obj.doclist?.forEach((item: any) => {
         if (item.draft) {
          draftHrefs.push(item.href);
         }
@@ -121,9 +151,9 @@ export async function writeDraftList(config: any, configKey: string = "scheduled
 // Remove temp files generated during render
 // Turned off if debug: true exists in config file.
 
-export async function removeTempDir(config: any, configKey: string = "scheduled-docs", tempFilesDir: string) {
+export async function removeTempDir(obj: any, tempFilesDir: string) {
   
-  if (!config[configKey].debug) {
+  if (!obj.debug) {
     try {
       await Deno.remove(tempFilesDir, { recursive: true });
       console.log(`> Temporary directory '${tempFilesDir}' has been removed.`);
@@ -139,9 +169,10 @@ export async function removeTempDir(config: any, configKey: string = "scheduled-
 // ----------------- //
 //     Utilities     //
 // ----------------- //
-export async function readYML(path: string): Promise<any> {
-  const yamlContent = await Deno.readTextFile(path);
-  return parse(yamlContent);
+export async function readYML(ymlPath: string, scheduledDocsKey: string): Promise<any> {
+  const yamlContent = await Deno.readTextFile(ymlPath);
+  const scheduledDocs = parse(yamlContent)[scheduledDocsKey];
+  return scheduledDocs;
 }
 
 function convertDateToISOFormat(dateStr: string, timezone: string): string {
