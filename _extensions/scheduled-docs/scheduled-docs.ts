@@ -175,22 +175,20 @@ export async function writeListingContents(obj: any, tempFilesDir: string ) {
   // use a `grouping-label` if defined, otherwise use `type`
   const type = obj['grouping-label'] ? obj['grouping-label'] : 'type';
 
-  // Group documents by their type
+  // group documents by their type
   for (const doc of obj.doclist) {
-    if (!doc[type]) {
+    if (!doc[type] || !doc.href) {
       continue;
     }
     const typeKey = doc[type].replace(" ", "-").toLowerCase();
     if (!groupedDocs[typeKey]) {
       groupedDocs[typeKey] = [];
     }
-    groupedDocs[typeKey].push(doc);
+    groupedDocs[typeKey].push({ path: `../${doc.href}` });
   }
   
   for (const [type, items] of Object.entries(groupedDocs)) {
     const outputPath = join(Deno.cwd(), tempFilesDir, `${type}-docs.yml`);
-   // const filename = `${type}-docs.yml`;
-    //const fullFilePath = `${outputPath}/${filename}`;
     await Deno.mkdir(tempFilesDir, { recursive: true });
     await Deno.writeTextFile(outputPath, stringify(items));
     console.log(`Created file: ${outputPath}`);
