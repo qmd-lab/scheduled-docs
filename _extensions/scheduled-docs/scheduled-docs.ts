@@ -4,13 +4,13 @@ import { join } from "https://deno.land/std/path/mod.ts";
 
 
 
-// -------------------------- //
-//     Propagate Meta Data    //
-// -------------------------- //
+// --------------------- //
+//     Propagate Keys    //
+// --------------------- //
 // Propagate the unignored keys into nested objects, being sure to not overwrite
 // any keys of the same name.
 
-export function propagateKeys(obj: any, parentProps: Record<string, string> = {}, ignoreKeys = ['debug', 'draft-after', 'timezone', 'this-week']) {
+export function propagateKeys(obj: any, parentProps: Record<string, string> = {}, ignoreKeys = ['debug', 'draft-after', 'timezone', 'this-week', 'grouping-label']) {
     if (Array.isArray(obj)) {
         obj.forEach(item => {
             if (typeof item === 'object' && item !== null) {
@@ -144,10 +144,64 @@ export async function writeDraftList(obj: any, tempFilesDir: string) {
   console.log(`  - Created metadata file: ${outputPath}`);
 }
 
+// -------------------------------- //
+//     Write scheduled-docs.yml     //
+// -------------------------------- //
+// Write the contents of scheduled-docs.yml to a file.
 
-// ---------------------------------- //
-//     Remove Temporary Directory     //
-// ---------------------------------- //
+export async function writeScheduledDocs(obj: any, tempFilesDir: string) {
+  console.log("> Making scheduled docs yml ...")
+  
+  // make a deep copy without any anchors / aliases so that stringify will
+  // create a yml version that can be parsed by ejs easily
+  const objNoAA = deepCopy(obj);
+  
+  const outputPath = join(Deno.cwd(), tempFilesDir, "scheduled-docs.yml");
+  await Deno.mkdir(tempFilesDir, { recursive: true });
+  await Deno.writeTextFile(outputPath, stringify(objNoAA));
+  console.log(`  - Created file: ${outputPath}`);
+}
+
+
+// ------------------------------- //
+//     Write listing contents      //
+// ------------------------------- //
+// Write the listing contents for all sets of docs with a defined group
+
+export async function writeListingContents(obj: any, tempFilesDir: string ) {
+  console.log("> Making listing contents files ...")
+  const groupedDocs: Record<string, any[]> = {};
+  
+  // use a `grouping-label` if defined, otherwise use `type`
+  const type = obj['grouping-label'] ? obj['grouping-label'] : 'type';
+
+  // Group documents by their type
+  for (const doc of obj.doclist) {
+    if (!doc[type]) {
+      continue;
+    }
+    const typeKey = doc[type].replace(" ", "-").toLowerCase();
+    if (!groupedDocs[typeKey]) {
+      groupedDocs[typeKey] = [];
+    }
+    groupedDocs[typeKey].push(doc);
+  }
+  
+  for (const [type, items] of Object.entries(groupedDocs)) {
+    const outputPath = join(Deno.cwd(), tempFilesDir, `${type}-docs.yml`);
+   // const filename = `${type}-docs.yml`;
+    //const fullFilePath = `${outputPath}/${filename}`;
+    await Deno.mkdir(tempFilesDir, { recursive: true });
+    await Deno.writeTextFile(outputPath, stringify(items));
+    console.log(`Created file: ${outputPath}`);
+  }
+}
+  
+
+  
+// --------------------------------- //
+//    Remove Temporary Directory     //
+// --------------------------------- //
 // Remove temp files generated during render
 // Turned off if debug: true exists in config file.
 
@@ -178,4 +232,15 @@ export async function readYML(ymlPath: string, scheduledDocsKey: string): Promis
 function convertDateToISOFormat(dateStr: string, timezone: string): string {
     const [month, day, year] = dateStr.split('/').map(num => num.padStart(2, '0'));
     return `20${year}-${month}-${day}T00:00:00${timezone}`;
+}
+
+function deepCopy(obj) {
+    if (obj === null || typeof obj !== 'object') {
+        return obj;
+    }
+    let temp = obj.constructor();
+    for (let key in obj) {
+        temp[key] = deepCopy(obj[key]);
+    }
+    return temp;
 }
