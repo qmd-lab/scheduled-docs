@@ -1,0 +1,9 @@
+project:
+  pre-render:
+    - run-scheduled-docs.ts
+  post-render:
+    - clean-scheduled-docs.ts
+    
+metadata-files:
+  - "scheduled-docs_files/draft-list.yml"
+      
