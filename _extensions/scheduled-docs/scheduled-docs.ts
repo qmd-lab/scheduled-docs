@@ -110,8 +110,8 @@ export function processSchedule(obj, itemsKey: string = "docs") {
   // append collected docs for easy downstream processing
   obj.doclist = collectedItems;
   
-  console.log(`  - ${nDrafts} items set to 'draft: true'.`);
-  console.log(`  - ${nNotDrafts} items set to 'draft: false'.`);
+  console.log(`  - ${nDrafts} docs set to 'draft: true'.`);
+  console.log(`  - ${nNotDrafts} docs set to 'draft: false'.`);
 
   //return config;
 }
@@ -141,7 +141,7 @@ export async function writeDraftList(obj: any, tempFilesDir: string) {
   const outputPath = join(Deno.cwd(), tempFilesDir, "draft-list.yml");
   await Deno.mkdir(tempFilesDir, { recursive: true });
   await Deno.writeTextFile(outputPath, stringify(draftList));
-  console.log(`  - Created metadata file: ${outputPath}`);
+  console.log(`  - Created file: ${outputPath}`);
 }
 
 // -------------------------------- //
@@ -187,11 +187,15 @@ export async function writeListingContents(obj: any, tempFilesDir: string ) {
     groupedDocs[typeKey].push({ path: `../${doc.href}` });
   }
   
-  for (const [type, items] of Object.entries(groupedDocs)) {
-    const outputPath = join(Deno.cwd(), tempFilesDir, `${type}-docs.yml`);
-    await Deno.mkdir(tempFilesDir, { recursive: true });
-    await Deno.writeTextFile(outputPath, stringify(items));
-    console.log(`Created file: ${outputPath}`);
+  if (Object.keys(groupedDocs).length === 0) {
+    console.log("  - No listing groups found");
+  } else {
+    for (const [typeKey, items] of Object.entries(groupedDocs)) {
+      const outputPath = join(Deno.cwd(), tempFilesDir, `${typeKey}-docs.yml`);
+      await Deno.mkdir(tempFilesDir, { recursive: true });
+      await Deno.writeTextFile(outputPath, stringify(items));
+      console.log(`Created file: ${outputPath}`);
+    }
   }
 }
   
