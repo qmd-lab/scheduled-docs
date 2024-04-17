@@ -12,7 +12,4 @@ contributes:
         - clean-scheduled-docs.ts
     metadata-files:
     - "scheduled-docs_files/draft-list.yml"
-  formats:
-    html:
-      toc: true
   
