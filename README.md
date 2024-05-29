@@ -19,9 +19,9 @@ To use this extension, start by adding the following three fields to your `_quar
 project:
   type: website
   pre-render:                                                 # add
-    - "_extensions/qmd-lab/scheduled-docs/write-draftlist.ts" # all
+    - "_extensions/qmd-lab/scheduled-docs/run-scheduled-docs.ts" # all
   post-render:                                                # of
-    - "_extensions/qmd-lab/scheduled-docs/rm-draftlist.ts"    # these
+    - "_extensions/qmd-lab/scheduled-docs/clean-scheduled-docs.ts"    # these
 metadata-files:                                               # lines
   - "scheduled-docs_files/draft-list.yml"                     # please
 ```
@@ -46,7 +46,7 @@ The three keys recognized under `scheduled-docs` are:
 - `docs`: an array of items where each one contains at least an `href` and `date` key. There is considerable flexibility in how you can structure these arrays.
 
 
-## Example
+## Tutorial
 
 This repository contains an example template of a website that implements `scheduled-docs`. You can install the template using:
 
@@ -75,13 +75,9 @@ quarto use template qmd-lab/scheduled-docs
 5. Comment out the first block of `scheduled-docs` yaml and uncomment the second block of `scheduled-docs`. Re-render the site and observe that the result is the same as in 2). This demonstrates that scheduled documents can be located anywhere under `scheduled-docs` as long as they're in an array called `docs` (and not nested within another `docs` array). This allows you to structure your `scheduled-docs` yaml in a manner that makes sense to you while still taking advantage of the scheduling functionality.
 
 
-## How it works
-
-The pre-render script reads through `_quarto.yml` and, for every item under `scheduled-docs:docs`, temporarily adds a `draft: true` or `draft: false` field to each depending on whether its `date` is before or after `draft-after`. It then filters to a simple array containing just the `hrefs` where `draft: true` and writes that to `scheduled-docs_files/draft-list.yml`. That file is read in as a `metadata-file` during `quarto render`, which, under the default `draft-mode: gone` will remove the contents from the draft files and ensure they don't appear in listings or search.
-
-The post-render script cleans things up by removing the `scheduled-docs_files` directory. If you run into problems understanding which files are being set to `draft: true`, you can add `debug: true` under the `scheduled-docs` key to retain the `scheduled-docs_files` directory.
-
 ## Other features
+
+### Automatic document listings
 
 This extension provides an additional method to specify the contents of a [document listing](https://quarto.org/docs/websites/website-listings.html) on your website. You can flag any subset of documents that you've listed under `docs` to be written into [YAML listing content](https://quarto.org/docs/websites/website-listings.html#yaml-listing-content) by adding a shared `type` value to those documents. For example, this:
 
@@ -119,8 +115,22 @@ Here are the tutorials:
 ```
 If there are multiple values under `type` (`type: tutorial` and `type: "New updates"`, say), a separate listing file will be created for each one in the same temporary directory with a name structured as `type-contents.yml` (lowercase, dashes instead of spaces) . Here, the contents for `type: "New updates"` would be in `scheduled-docs_files/new-updates-contents.yml`.
 
-If you'd like to flag listing contents using a key other than `type`, change it using the `grouping-label` key.
+If you'd like to flag listing contents using a key other than `type`, change it using the `grouping-label` key under `scheduled-docs`. For example,
+
 ```
 scheduled-docs:
   grouping-label: unit
 ```
+
+### Schedule yaml file
+
+The structured description of the document schedule found in `_quarto.yml` is useful for automatically populating an html version of the schedule for display on a website. For that purpose, this extension writes a separate yaml file to `scheduled-docs_files/scheduled-docs.yml` that can be read into an EJS template. [Read the Quarto docs](https://quarto.org/docs/websites/website-listings-custom.html#metadata-file-listings) to learn more about populating an EJS template using a yaml file.
+
+To inspect the structure of the yaml file, add `debug: true` under the `scheduled-docs` key to retain `scheduled-docs_files/scheduled-docs.yml` after rendering.
+
+
+## How it works
+
+The pre-render script reads through `_quarto.yml` and, for every item under `scheduled-docs:docs`, temporarily adds a `draft: true` or `draft: false` field to each depending on whether its `date` is before or after `draft-after`. It then filters to a simple array containing just the `hrefs` where `draft: true` and writes that to `scheduled-docs_files/draft-list.yml`. That file is read in as a `metadata-file` during `quarto render`, which, under the default `draft-mode: gone` will remove the contents from the draft files and ensure they don't appear in listings or search.
+
+The post-render script cleans things up by removing the `scheduled-docs_files` directory. If you run into problems understanding which files are being set to `draft: true`, you can add `debug: true` under the `scheduled-docs` key to retain the `scheduled-docs_files` directory.
