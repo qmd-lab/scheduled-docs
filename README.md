@@ -18,12 +18,12 @@ To use this extension, start by adding the following three fields to your `_quar
 ```yaml
 project:
   type: website
-  pre-render:                                                 # add
-    - "_extensions/qmd-lab/scheduled-docs/run-scheduled-docs.ts" # all
-  post-render:                                                # of
-    - "_extensions/qmd-lab/scheduled-docs/clean-scheduled-docs.ts"    # these
-metadata-files:                                               # lines
-  - "scheduled-docs_files/draft-list.yml"                     # please
+  pre-render:                                                      # add
+    - "_extensions/qmd-lab/scheduled-docs/run-scheduled-docs.ts"   # all
+  post-render:                                                     # of
+    - "_extensions/qmd-lab/scheduled-docs/clean-scheduled-docs.ts" # these
+metadata-files:                                                    # lines
+  - "scheduled-docs_files/draft-list.yml"                          # please
 ```
 Once you've done that, you can now add a new key called `scheduled-docs` to your `_quarto.yml` where you can list the documents that you would like to schedule along with parameters that determine when they should be rendered. For example:
 
