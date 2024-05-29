@@ -2,6 +2,7 @@
 listing:
   id: "posts"
   contents: posts
+  #contents: "scheduled-docs_files/part-a-docs.yml"
   sort: "date desc"
   type: default
   categories: true
