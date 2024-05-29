@@ -1,8 +1,0 @@
-project:
-  pre-render:
-    - "_extensions/scheduled_docs/write-draftlist.ts"
-  post-render:
-    - "_extensions/scheduled_docs/rm-draftlist.ts"
-
-metadata-files:
-  - "scheduled-docs_files/draft-list.yml"
