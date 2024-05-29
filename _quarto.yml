@@ -1,16 +1,13 @@
 project:
   type: website
   pre-render:
-    - "_extensions/scheduled-docs/write-draftlist.ts"
+    - "_extensions/scheduled-docs/run-scheduled-docs.ts"
   post-render:
-    - "_extensions/scheduled-docs/rm-draftlist.ts"
+    - "_extensions/scheduled-docs/clean-scheduled-docs.ts"
 
 metadata-files:
   - "scheduled-docs_files/draft-list.yml"
 
-# this approach to triggering the functionality does not work
-# metadata-files: 
-#   - "_extensions/scheduled-docs/scheduled-docs.yml"
 
 website:
   title: "scheduled-docs"
@@ -34,6 +31,7 @@ scheduled-docs:
       date: 1/3/24
     - href: "posts/post-3.qmd"
       date: 1/5/24
+
 
 # alternative structure showing the `docs:` can be nested anywhere in `scheduled-docs`:
 # scheduled-docs:
