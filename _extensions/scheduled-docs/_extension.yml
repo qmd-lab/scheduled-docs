@@ -4,10 +4,11 @@ version: 0.5.0
 quarto-required: ">=1.5.0"
 contributes:
   project:
-    pre-render:
-      - run-scheduled-docs.ts
-    post-render:
-      - clean-scheduled-docs.ts
-  metadata-files:
-    - "scheduled-docs_files/draft-list.yml"
+    project:
+      pre-render:
+        - run-scheduled-docs.ts
+      post-render:
+        - clean-scheduled-docs.ts
+    metadata-files:
+      - "scheduled-docs_files/draft-list.yml"
   
