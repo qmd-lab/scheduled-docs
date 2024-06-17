@@ -1,6 +1,6 @@
 
 // Import external libraries
-import { readYML, propagateKeys, processSchedule, writeDraftList, writeScheduledDocs, writeListingContents } from "./scheduled-docs.ts";
+import { readYML, propagateKeys, processSchedule, writeDraftList, writeSchedule, writeListingContents } from "./scheduled-docs.ts";
 
 // Set parameters
 const ymlPath = '_quarto.yml';
@@ -15,5 +15,5 @@ let scheduledDocs = await readYML(ymlPath, scheduledDocsKey);
 propagateKeys(scheduledDocs);
 processSchedule(scheduledDocs, itemsKey);
 await writeDraftList(scheduledDocs, tempFilesDir);
-await writeScheduledDocs(scheduledDocs, tempFilesDir);
+await writeSchedule(scheduledDocs, tempFilesDir);
 await writeListingContents(scheduledDocs, tempFilesDir);
