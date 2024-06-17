@@ -145,21 +145,45 @@ export async function writeDraftList(obj: any, tempFilesDir: string) {
 }
 
 // -------------------------------- //
-//     Write scheduled-docs.yml     //
+//     Write schedule.yml     //
 // -------------------------------- //
-// Write the contents of scheduled-docs.yml to a file.
+// Write the contents of schedule.yml to a file.
 
-export async function writeScheduledDocs(obj: any, tempFilesDir: string) {
-  console.log("> Making scheduled docs yml ...")
+export async function writeSchedule(obj: any, tempFilesDir: string) {
+  console.log("> Making schedule.yml ...")
   
   // make a deep copy without any anchors / aliases so that stringify will
   // create a yml version that can be parsed by ejs easily
   const objNoAA = deepCopy(obj);
+  const schedule = findTopArrayWithDocs(objNoAA);
   
-  const outputPath = join(Deno.cwd(), tempFilesDir, "scheduled-docs.yml");
+  const outputPath = join(Deno.cwd(), tempFilesDir, "schedule.yml");
   await Deno.mkdir(tempFilesDir, { recursive: true });
-  await Deno.writeTextFile(outputPath, stringify(objNoAA));
+  await Deno.writeTextFile(outputPath, stringify(schedule));
   console.log(`  - Created file: ${outputPath}`);
+}
+
+// Recursive function to find the top-most array contains `docs`. This is 
+// to allow schedule.yml to be read in as `items` in an ejs template, 
+// requires an array at the top level.
+function findTopArrayWithDocs(current: any): any[] | undefined {
+    if (Array.isArray(current)) {
+        if (current.some(element => typeof element === 'object' && 'docs' in element)) {
+            return current;  // return the array if any element has a 'docs' key
+        }
+        for (const element of current) {
+            const result = findTopArrayWithDocs(element);
+            if (result) return result;
+        }
+    } else if (typeof current === 'object' && current !== null) {
+        for (const key of Object.keys(current)) {
+            if (key === 'docs' && Array.isArray(current[key])) {
+                return current[key];  // directly return the array if it's under a 'docs' key
+            }
+            const result = findTopArrayWithDocs(current[key]);
+            if (result) return result;
+        }
+    }
 }
 
 
