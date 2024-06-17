@@ -124,9 +124,9 @@ scheduled-docs:
 
 ### Schedule yaml file
 
-The structured description of the document schedule found in `_quarto.yml` is useful for automatically populating an html version of the schedule for display on a website. For that purpose, this extension writes a separate yaml file to `scheduled-docs_files/scheduled-docs.yml` that can be read into an EJS template. [Read the Quarto docs](https://quarto.org/docs/websites/website-listings-custom.html#metadata-file-listings) to learn more about populating an EJS template using a yaml file.
+The structured description of the document schedule found in `_quarto.yml` is useful for automatically populating an html version of the schedule for display on a website. For that purpose, this extension writes a separate yaml file to `scheduled-docs_files/schedule.yml` that can be read into an EJS template. [Read the Quarto docs](https://quarto.org/docs/websites/website-listings-custom.html#metadata-file-listings) to learn more about populating an EJS template using a yaml file.
 
-To inspect the structure of the yaml file, add `debug: true` under the `scheduled-docs` key to retain `scheduled-docs_files/scheduled-docs.yml` after rendering.
+To inspect the structure of the yaml file, add `debug: true` under the `scheduled-docs` key to retain `scheduled-docs_files/schedule.yml` after rendering.
 
 
 ## How it works
