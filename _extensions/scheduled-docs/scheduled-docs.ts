@@ -155,35 +155,25 @@ export async function writeSchedule(obj: any, tempFilesDir: string) {
   // make a deep copy without any anchors / aliases so that stringify will
   // create a yml version that can be parsed by ejs easily
   const objNoAA = deepCopy(obj);
-  const schedule = findTopArrayWithDocs(objNoAA);
+  let scheduleArray;
+    if ('docs' in objNoAA && 'schedule' in objNoAA) {
+        throw new Error('The object can only have one of the keys "docs" or "schedule" at the top level.');
+    } else if ('docs' in objNoAA) {
+        scheduleArray = obj['docs'];
+    } else if ('schedule' in objNoAA) {
+        scheduleArray = obj['schedule'];
+    } else {
+        throw new Error('The "scheduled-docs" must contain either "docs" or "schedule" key at the top level.');
+    }
+  
+  if (!Array.isArray(scheduleArray)) {
+    throw new Error("If you use the `scheduled-docs: schedule` key, be sure it is an array, not an object with named keys.");
+  }
   
   const outputPath = join(Deno.cwd(), tempFilesDir, "schedule.yml");
   await Deno.mkdir(tempFilesDir, { recursive: true });
-  await Deno.writeTextFile(outputPath, stringify(schedule));
+  await Deno.writeTextFile(outputPath, stringify(scheduleArray));
   console.log(`  - Created file: ${outputPath}`);
-}
-
-// Recursive function to find the top-most array contains `docs`. This is 
-// to allow schedule.yml to be read in as `items` in an ejs template, 
-// requires an array at the top level.
-function findTopArrayWithDocs(current: any): any[] | undefined {
-    if (Array.isArray(current)) {
-        if (current.some(element => typeof element === 'object' && 'docs' in element)) {
-            return current;  // return the array if any element has a 'docs' key
-        }
-        for (const element of current) {
-            const result = findTopArrayWithDocs(element);
-            if (result) return result;
-        }
-    } else if (typeof current === 'object' && current !== null) {
-        for (const key of Object.keys(current)) {
-            if (key === 'docs' && Array.isArray(current[key])) {
-                return current[key];  // directly return the array if it's under a 'docs' key
-            }
-            const result = findTopArrayWithDocs(current[key]);
-            if (result) return result;
-        }
-    }
 }
 
 
@@ -251,7 +241,12 @@ export async function removeTempDir(obj: any, tempFilesDir: string) {
 // ----------------- //
 export async function readYML(ymlPath: string, scheduledDocsKey: string): Promise<any> {
   const yamlContent = await Deno.readTextFile(ymlPath);
-  const scheduledDocs = parse(yamlContent)[scheduledDocsKey];
+  const parsedYaml = parse(yamlContent);
+  if (!parsedYaml.hasOwnProperty('scheduled-docs')) {
+    console.log('> "scheduled-docs" key not found in "_quarto.yml". scheduled-docs"" extension is installed but not being used.');
+    Deno.exit(0); // Exits the script if the extension is added but not used
+  }
+  const scheduledDocs = parsedYaml[scheduledDocsKey];
   return scheduledDocs;
 }
 

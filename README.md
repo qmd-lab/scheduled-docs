@@ -8,24 +8,11 @@ This set of scripts allows you to schedule the rendering of documents within a Q
 quarto add qmd-lab/scheduled-docs
 ```
 
-This will install the scripts under the `_extensions` subdirectory.
-If you're using version control, you will want to check in this directory.
+This will install the scripts under the `_extensions` subdirectory. If you're using version control, you will want to check in this directory.
 
 ## Using
 
-To use this extension, start by adding the following three fields to your `_quarto.yml` file.
-
-```yaml
-project:
-  type: website
-  pre-render:                                                      # add
-    - "_extensions/qmd-lab/scheduled-docs/run-scheduled-docs.ts"   # all
-  post-render:                                                     # of
-    - "_extensions/qmd-lab/scheduled-docs/clean-scheduled-docs.ts" # these
-metadata-files:                                                    # lines
-  - "scheduled-docs_files/draft-list.yml"                          # please
-```
-Once you've done that, you can now add a new key called `scheduled-docs` to your `_quarto.yml` where you can list the documents that you would like to schedule along with parameters that determine when they should be rendered. For example:
+Add a new key called `scheduled-docs` to your `_quarto.yml` where you can list the documents that you would like to schedule along with parameters that determine when they should be rendered. For example:
 
 ```yaml
 # somewhere in your _quarto.yml ...
@@ -39,11 +26,11 @@ scheduled-docs:
     - href: "posts/post-2.qmd"
       date: 1/3/24
 ```
-The three keys recognized under `scheduled-docs` are:
+The three keys required under `scheduled-docs` are:
 
 - `draft-after`: can take values either `system-time` or a fixed date in MM/DD/YY format like `1/2/24`. All .qmd files under a `docs` key with a `date` that is in the future relative to `draft-after` will be set to `draft: true`.
 - `timezone`: the offset from GMT in +/-hh:mm. Currently this does not adjust for daylight savings.
-- `docs`: an array of items where each one contains at least an `href` and `date` key. There is considerable flexibility in how you can structure these arrays.
+- `docs`: an array of items where each one contains at least an `href` and `date` key. There is considerable flexibility in how you can structure these arrays; see Things to Try number 5 and "Other features > Schedule yaml file" for details.
 
 
 ## Tutorial
@@ -72,7 +59,7 @@ quarto use template qmd-lab/scheduled-docs
        date: 1/5/24
    ```
    Re-render the site and observe that now posts 1 and 3 are rendered. This demonstrates that you can manually override the `draft-after` date by hard-coding a draft value of an item (either `true` or `false`).
-5. Comment out the first block of `scheduled-docs` yaml and uncomment the second block of `scheduled-docs`. Re-render the site and observe that the result is the same as in 2). This demonstrates that scheduled documents can be located anywhere under `scheduled-docs` as long as they're in an array called `docs` (and not nested within another `docs` array). This allows you to structure your `scheduled-docs` yaml in a manner that makes sense to you while still taking advantage of the scheduling functionality.
+5. Comment out the first block of `scheduled-docs` yaml and uncomment the second block of `scheduled-docs`. Re-render the site and observe that the result is the same as in 2). This demonstrates that scheduled documents can be located anywhere under an `scheduled-docs:schedule` array as long as they're in an array called `docs` (and not nested within another `docs` array). This allows you to structure your `scheduled-docs` yaml in a manner that makes sense to you while still taking advantage of the scheduling functionality. See "Other features > Schedule yaml file" for more info.
 
 
 ## Other features
@@ -125,6 +112,8 @@ scheduled-docs:
 ### Schedule yaml file
 
 The structured description of the document schedule found in `_quarto.yml` is useful for automatically populating an html version of the schedule for display on a website. For that purpose, this extension writes a separate yaml file to `scheduled-docs_files/schedule.yml` that can be read into an EJS template. [Read the Quarto docs](https://quarto.org/docs/websites/website-listings-custom.html#metadata-file-listings) to learn more about populating an EJS template using a yaml file.
+
+If you supply your documents as a simple array under the `scheduled-docs:docs` key, it is that array that will be written into `scheduled-docs_files/schedule.yml`. Alternatively you can put your `docs` under `scheduled-docs:schedule` as a simple array. Each item in this array can contain either arrays or objects with keys and values, presumably at least one of which is a `docs` array. This flexibility allows you to write a nested schedule that captures all of the information that you'd like to send to `schedule.yml` while still maintaining the scheduled docs functionality for any documents found under a `docs` key. See "Things to try number 5" for an example.
 
 To inspect the structure of the yaml file, add `debug: true` under the `scheduled-docs` key to retain `scheduled-docs_files/schedule.yml` after rendering.
 

@@ -1,12 +1,5 @@
 project:
   type: website
-  pre-render:
-    - "_extensions/scheduled-docs/run-scheduled-docs.ts"
-  post-render:
-    - "_extensions/scheduled-docs/clean-scheduled-docs.ts"
-
-metadata-files:
-  - "scheduled-docs_files/draft-list.yml"
 
 
 website:
@@ -37,7 +30,7 @@ scheduled-docs:
 # scheduled-docs:
 #   draft-after: "1/4/24" # can use "system-time" or manually set datetime using format "1/2/24"
 #   timezone: "-07:00" # GMT offset in +/-hh:mm does not adjust for daylight savings
-#   units:
+#   schedule:
 #     - type: Part A
 #       docs:
 #         - href: "posts/post-1.qmd"
