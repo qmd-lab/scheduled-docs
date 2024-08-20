@@ -1,0 +1,5 @@
+path-to-yaml: '_quarto.yml'
+scheduled-docs-key: 'scheduled-docs'
+items-key: 'docs'
+temp-files-dir: '.scheduled-docs_files'
+temp-files-dir-offset: '..'
