@@ -1,12 +1,13 @@
 
 // Import external libraries
-import { readYML, removeTempDir } from "./scheduled-docs.ts";
+import { readConfig, readScheduledDocs, removeTempDir } from "./scheduled-docs.ts";
 
-// Set parameters
-const ymlPath = '_quarto.yml';
-const scheduledDocsKey = "scheduled-docs"
-const tempFilesDir = './scheduled-docs_files';
+// Get parameters
+const configParams = await readConfig();
+const ymlPath = configParams['path-to-yaml']
+const scheduledDocsKey = configParams['scheduled-docs-key'];
+const tempFilesDir = configParams['temp-files-dir'];
 
 // Run functions
-const scheduledDocs = await readYML(ymlPath, scheduledDocsKey);
+const scheduledDocs = await readScheduledDocs(ymlPath, scheduledDocsKey, configParams);
 await removeTempDir(scheduledDocs, tempFilesDir);
