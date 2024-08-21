@@ -206,12 +206,75 @@ export async function writeListingContents(obj: any, tempFilesDir: string ) {
     console.log("  - No listing groups found");
   } else {
     for (const [typeKey, items] of Object.entries(groupedDocs)) {
-      const outputPath = join(Deno.cwd(), tempFilesDir, `${typeKey}-docs.yml`);
+      const outputPath = join(Deno.cwd(), tempFilesDir, `${typeKey}-listing.yml`);
       await Deno.mkdir(tempFilesDir, { recursive: true });
       await Deno.writeTextFile(outputPath, stringify(items));
       console.log(`  - Created file: ${outputPath}`);
     }
   }
+}
+  
+  
+// ------------------------------- //
+//     Write sidebar contents      //
+// ------------------------------- //
+// Write the sidebar contents for all sets of docs with a defined group
+
+export async function writeSidebarContents(obj: any, tempFilesDir: string ) {
+  console.log("> Making sidebar contents files ...")
+  
+  // use a `grouping-label` if defined, otherwise use `type`
+  const type = obj['grouping-label'] ? obj['grouping-label'] : 'type';
+  
+  // exit if not using a sidebar
+  if (obj?.autonav?.sidebar?.[type] === undefined ) {
+    console.log("  - Sidebar autonav not being used.");
+    return;
+  }
+  
+  const sidebarSection = obj.autonav.sidebar[type];
+
+  // group documents by their type
+  const groupedDocs: Record<string, any[]> = {};
+  
+  for (const doc of obj.doclist) {
+    if (!doc[type] || !doc.href) {
+      continue;
+    }
+    const typeKey = doc[type].replace(" ", "-").toLowerCase();
+    if (!groupedDocs[typeKey]) {
+      groupedDocs[typeKey] = [];
+    }
+    groupedDocs[typeKey].push({ href: `${doc.href}` });
+  }
+  
+  // Process only the group that matches the sidebarSection
+  const typeKey = sidebarSection.replace(" ", "-").toLowerCase();
+  const items = groupedDocs[typeKey];
+
+  if (!items) {
+    console.log("  - No matching group of docs found for ", sidebarSection);
+    return;
+  }
+
+  const yamlContent = {
+    website: {
+      sidebar: {
+        contents: [
+          {
+            section: typeKey,
+            href: `${typeKey}.qmd`,
+            contents: items
+          }
+        ]
+      }
+    }
+  };
+
+  const outputPath = join(Deno.cwd(), tempFilesDir, `sidebar-contents.yml`);
+  await Deno.mkdir(tempFilesDir, { recursive: true });
+  await Deno.writeTextFile(outputPath, stringify(yamlContent));
+  console.log(`  - Created file: ${outputPath}`);
 }
   
 
