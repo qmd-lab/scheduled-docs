@@ -1,6 +1,7 @@
 // Import external libraries
 import { parse, stringify } from "https://deno.land/std/yaml/mod.ts";
 import { join } from "https://deno.land/std/path/mod.ts";
+import { existsSync } from "https://deno.land/std/fs/mod.ts";
 
 
 
@@ -239,11 +240,29 @@ export async function removeTempDir(obj: any, tempFilesDir: string) {
 // ----------------- //
 //     Utilities     //
 // ----------------- //
-export async function readYML(ymlPath: string, scheduledDocsKey: string): Promise<any> {
+export async function readConfig(): Promise<any> {
+  // the extension can be installed in two places, so check both
+  const path1 = './_extensions/scheduled-docs/config.yml';
+  const path2 = './_extensions/qmd-lab/scheduled-docs/config.yml';
+  let yamlContent: string;
+
+  if (existsSync(path1)) {
+    yamlContent = await Deno.readTextFile(path1);
+  } else if (existsSync(path2)) {
+      yamlContent = await Deno.readTextFile(path2);
+  } else {
+      throw new Error('Scheduled-docs config.yml file not found.');
+  }
+
+  const parsedYaml = parse(yamlContent);
+  return parsedYaml
+}
+
+export async function readScheduledDocs(ymlPath: string, scheduledDocsKey: string, configParams: string): Promise<any> {
   const yamlContent = await Deno.readTextFile(ymlPath);
   const parsedYaml = parse(yamlContent);
-  if (!parsedYaml.hasOwnProperty('scheduled-docs')) {
-    console.log('> "scheduled-docs" key not found in "_quarto.yml". scheduled-docs"" extension is installed but not being used.');
+  if (!parsedYaml.hasOwnProperty(configParams['scheduled-docs-key'])) {
+    console.log(`> "${configParams['scheduled-docs-key']}" key not found in ${configParams['path-to-yaml']}. Extension is installed but not being used.`);
     Deno.exit(0); // Exits the script if the extension is added but not used
   }
   const scheduledDocs = parsedYaml[scheduledDocsKey];
