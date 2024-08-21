@@ -11,6 +11,9 @@ website:
       - icon: twitter
         href: https://twitter.com
         
+metadata-files: 
+  - scheduled-docs_files/draft-list.yml
+        
 format:
   html:
     theme: cosmo
