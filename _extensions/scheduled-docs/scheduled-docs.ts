@@ -208,7 +208,7 @@ export async function writeListingContents(obj: any, tempFilesDir: string ) {
       const outputPath = join(Deno.cwd(), tempFilesDir, `${typeKey}-docs.yml`);
       await Deno.mkdir(tempFilesDir, { recursive: true });
       await Deno.writeTextFile(outputPath, stringify(items));
-      console.log(`Created file: ${outputPath}`);
+      console.log(`  - Created file: ${outputPath}`);
     }
   }
 }
