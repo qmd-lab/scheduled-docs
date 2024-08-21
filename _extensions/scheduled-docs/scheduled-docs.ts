@@ -255,6 +255,12 @@ function convertDateToISOFormat(dateStr: string, timezone: string): string {
     return `20${year}-${month}-${day}T00:00:00${timezone}`;
 }
 
+//To do - see if you can write a handler that can take locale instead of offset
+function convertDateToISOFormat2(dateStr: string, timezone: string): string {
+    const [month, day, year] = dateStr.split('/').map(num => num.padStart(2, '0'));
+    return `20${year}-${month}-${day}T00:00:00${timezone}`;
+}
+
 function deepCopy(obj) {
     if (obj === null || typeof obj !== 'object') {
         return obj;
