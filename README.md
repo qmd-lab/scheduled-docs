@@ -10,6 +10,8 @@ quarto add qmd-lab/scheduled-docs
 
 This will install the scripts under the `_extensions` subdirectory. If you're using version control, you will want to check in this directory.
 
+> Note: in addition to the usage instructions below, you may also need to add `metadata-files: [scheduled-docs_files/draft-list.yml]` to `_quarto.yml`. This will hopefully be fixed in the future. You can track the issue [here](https://github.com/quarto-dev/quarto-cli/issues/10572).
+
 ## Using
 
 Create a new file at the root of your project called `_schedule.yml` and add a `scheduled-docs` key. From here you can list the documents that you would like to schedule along with parameters that determine when they should be rendered. For example:
