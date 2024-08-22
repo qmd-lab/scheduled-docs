@@ -1,6 +1,6 @@
 
 // Import external libraries
-import { readConfig, readScheduledDocs, propagateKeys, processSchedule, writeDraftList, writeSchedule, writeListingContents } from "./scheduled-docs.ts";
+import { readConfig, readScheduledDocs, propagateKeys, processSchedule, writeDraftList, writeSchedule, writeListingContents, writeAutonavContents } from "./scheduled-docs.ts";
 console.log("=== Scheduled-docs ===");
 
 // Get parameters
@@ -17,3 +17,4 @@ processSchedule(scheduledDocs, itemsKey);
 await writeDraftList(scheduledDocs, tempFilesDir);
 await writeSchedule(scheduledDocs, tempFilesDir);
 await writeListingContents(scheduledDocs, tempFilesDir);
+await writeAutonavContents(scheduledDocs, tempFilesDir);

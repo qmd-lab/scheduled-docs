@@ -206,14 +206,201 @@ export async function writeListingContents(obj: any, tempFilesDir: string ) {
     console.log("  - No listing groups found");
   } else {
     for (const [typeKey, items] of Object.entries(groupedDocs)) {
-      const outputPath = join(Deno.cwd(), tempFilesDir, `${typeKey}-docs.yml`);
+      const outputPath = join(Deno.cwd(), tempFilesDir, `${typeKey}-listing.yml`);
       await Deno.mkdir(tempFilesDir, { recursive: true });
       await Deno.writeTextFile(outputPath, stringify(items));
-      console.log(`Created file: ${outputPath}`);
+      console.log(`  - Created file: ${outputPath}`);
     }
   }
 }
   
+  
+// ------------------------------- //
+//     Write autonav contents      //
+// ------------------------------- //
+// Write the sidebar contents (sidebar or hybrid nav) for all sets of docs with a defined group
+
+export async function writeAutonavContents(obj: any, tempFilesDir: string) {
+  
+  // Exit if not using autonav
+  if (obj.autonav === undefined ) {
+    return;
+  } else {
+    console.log("> Processing autonav options ...");
+  }
+  
+  if (obj.autonav.sidebar !== undefined && obj.autonav.hybrid !== undefined) {
+    console.log("  - Can only use sidebar or hybrid navigation, not both.");
+    return;
+  }
+  
+  if (obj.autonav.sidebar !== undefined) {
+    await writeSidebarContents(obj, tempFilesDir);
+  } else if (obj.autonav.hybrid !== undefined) {
+    await writeHybridContents(obj, tempFilesDir);
+  } else {
+    console.log("  - Neither hybrid or sidebar options found.");
+    return;
+  }
+}
+
+async function writeSidebarContents(obj: any, tempFilesDir: string) {
+  console.log("  > Making sidebar contents files ...");
+  
+  // use a `grouping-label` if defined, otherwise use `type`
+  const type = obj['grouping-label'] ? obj['grouping-label'] : 'type';
+
+  // get the sidebar type and subsection label
+  const sidebarType = obj.autonav.sidebar.type;
+  const sectionLabel = obj.autonav.sidebar['section-label'] || 'subtype';
+
+  // group documents by their type and section
+  const groupedDocs: Record<string, Record<string, any[]>> = {};
+
+  for (const doc of obj.doclist) {
+    if (!doc[type] || !doc.href) {
+      continue;
+    }
+    const originalType = doc[type];
+    const originalSection = doc[sectionLabel] || "No Section";
+    
+    const typeKey = originalType.replace(" ", "-").toLowerCase();
+    const sectionKey = originalSection.replace(" ", "-").toLowerCase();
+
+    if (!groupedDocs[typeKey]) {
+      groupedDocs[typeKey] = {};
+    }
+    if (!groupedDocs[typeKey][sectionKey]) {
+      groupedDocs[typeKey][sectionKey] = [];
+    }
+    groupedDocs[typeKey][sectionKey].push({ href: `${doc.href}`, originalSection });
+  }
+
+  // process only the group that matches the sidebar type
+  const items = groupedDocs[sidebarType.toLowerCase().replace(" ", "-")];
+
+  if (!items) {
+    console.log("    - No matching group of docs found for ", sidebarType);
+    return;
+  }
+
+  // build the contents structure
+  const sidebarContents: any[] = [];
+
+  if (items["no-section"]) {
+    // add items without a section first
+    sidebarContents.push(...items["no-section"]);
+    delete items["no-section"];
+  }
+
+  for (const [sectionKey, docs] of Object.entries(items)) {
+    const originalSectionName = docs[0].originalSection;
+    sidebarContents.push({
+      section: originalSectionName,
+      contents: docs.map(doc => ({ href: doc.href }))
+    });
+  }
+
+  const yamlContent = {
+    website: {
+      sidebar: {
+        contents: [
+          {
+            section: sidebarType,
+            href: `${sidebarType}.qmd`,
+            contents: sidebarContents
+          }
+        ]
+      }
+    }
+  };
+
+  const outputPath = join(Deno.cwd(), tempFilesDir, `sidebar-contents.yml`);
+  await Deno.mkdir(tempFilesDir, { recursive: true });
+  await Deno.writeTextFile(outputPath, stringify(yamlContent));
+  console.log(`    - Created file: ${outputPath}`);
+}
+
+
+async function writeHybridContents(obj: any, tempFilesDir: string) {
+  console.log("  > Making hybrid contents files ...");
+
+  // initialize sidebar contents
+  const sidebarContents: any[] = [];
+
+  // iterate over each hybrid config entry
+  for (const hybridConfig of obj.autonav.hybrid) {
+    // use a `grouping-label` if defined, otherwise use `type`
+    const typeLabel = obj['grouping-label'] ? obj['grouping-label'] : 'type';
+    
+    const type = hybridConfig[typeLabel];
+    const landingPage = hybridConfig['landing-page'];
+    const sectionLabel = hybridConfig['section-label'] || null;
+
+    // create a new sidebar item, copying all keys from hybridConfig
+    const sidebarItem: any = { ...hybridConfig };
+    delete sidebarItem.type;
+    delete sidebarItem['landing-page'];
+    delete sidebarItem['section-label'];
+
+    // group documents by their type and section (if sectionLabel is defined)
+    const groupedDocs: Record<string, any[]> = {};
+
+    for (const doc of obj.doclist) {
+      if (doc.type !== type || !doc.href) {
+        continue;
+      }
+
+      if (sectionLabel && doc[sectionLabel]) {
+        const originalSection = doc[sectionLabel];
+        if (!groupedDocs[originalSection]) {
+          groupedDocs[originalSection] = [];
+        }
+        groupedDocs[originalSection].push({ href: `${doc.href}` });
+      } else {
+        // if no sectionLabel, group all under a generic "default" key
+        if (!groupedDocs['default']) {
+          groupedDocs['default'] = [];
+        }
+        groupedDocs['default'].push({ href: `${doc.href}` });
+      }
+    }
+
+    // build the contents structure for the current hybrid config
+    const sectionContents: any[] = [
+      { href: landingPage }
+    ];
+
+    if (sectionLabel) {
+      for (const [section, docs] of Object.entries(groupedDocs)) {
+        sectionContents.push({
+          section: section,
+          contents: docs
+        });
+      }
+    } else {
+      sectionContents.push(...groupedDocs['default']);
+    }
+
+    // add the contents array to the sidebar item
+    sidebarItem.contents = sectionContents;
+
+    // add this sidebar item to the final sidebar contents
+    sidebarContents.push(sidebarItem);
+  }
+
+  const yamlContent = {
+    website: {
+      sidebar: sidebarContents
+    }
+  };
+
+  const outputPath = join(Deno.cwd(), tempFilesDir, `sidebar-contents.yml`);
+  await Deno.mkdir(tempFilesDir, { recursive: true });
+  await Deno.writeTextFile(outputPath, stringify(yamlContent));
+  console.log(`    - Created file: ${outputPath}`);
+}
+
 
   
 // --------------------------------- //

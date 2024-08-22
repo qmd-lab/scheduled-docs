@@ -1,0 +1,8 @@
+*.html
+*.pdf
+*_files/
+/.quarto/
+_site/
+.Rproj.user
+*.Rproj
+.Rhistory

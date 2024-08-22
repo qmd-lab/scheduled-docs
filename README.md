@@ -84,7 +84,7 @@ docs:
     type: tutorial
 ```
 
-Will lead to the creation of a file called `scheduled-docs_files/tutorial-docs.yml` that looks like:
+Will lead to the creation of a file called `scheduled-docs_files/tutorial-listing.yml` that looks like:
 
 ```         
 - path: ../posts/post-1.qmd
@@ -99,7 +99,7 @@ title: "Listing Example"
 listing:
   id: tutorial-listing
   contents: 
-    - `scheduled-docs_files/tutorial-docs.yml`
+    - `scheduled-docs_files/tutorial-listing.yml`
 ---
 
 Here are the tutorials:
@@ -116,6 +116,73 @@ If you'd like to flag listing contents using a key other than `type`, change it 
 scheduled-docs:
   grouping-label: unit
 ```
+
+### Automatic Website Navigation
+
+Setting up your scheduled docs requires writing paths to documents that may also be written into the site navigation in `_quarto.yml`. You can save that duplication of effort by utilizing the `autonav` option for either sidebar or hybrid navigation.
+
+#### Sidebar Navigation
+
+In Quarto's [sidebar navigation](https://quarto.org/docs/websites/website-navigation.html#side-navigation), there is a single sidebar that appears on the side of the website to provide links to documents. Instead of typing the structure of this sidebar into `_quarto.yml`, you can add the `sidebar` autonav option in `_schedule.yml`.
+
+```yml
+scheduled-docs:
+  autonav:
+    sidebar:
+      type: notes
+```
+
+This will create a `scheduled-docs_files/sidebar-contents.yml` file that can then be appended to your `_quarto.yml` with:
+
+```yml
+metadata-files:
+  - scheduled-docs_files/draft-list.yml
+  - scheduled-docs_files/sidebar-contents.yml
+```
+
+The `sidebar-contents.yml` file will include all of the `docs` that have `type: notes`. If you have changed the `grouping-label` to `unit` for example (see Automatic Document Listings section), you will use that key instead.
+
+```yml
+scheduled-docs:
+  autonav:
+    sidebar:
+      unit: notes
+```
+
+If you would like to create sections in your sidebar to organize your documents, you can add a `section-label` option.
+
+```yml
+scheduled-docs:
+  autonav:
+    sidebar:
+      type: notes
+      section-label: topic
+```
+
+This allows you to append an additional key and value to each of your `docs` (in this case, the key `topic`) and then have each doc appear in a sidebar section under its value of the `section-label`.
+
+#### Hybrid Navigation
+
+[Hybrid navigation](https://quarto.org/docs/websites/website-navigation.html#hybrid-navigation) is used on more complex Quarto website where you'd like a different sidebar to appear depending on which part of the website you're in, with each sidebar corresponding to a different item on the top navbar.
+
+```yml
+scheduled-docs:
+  autonav:
+    hybrid:
+      - title: Notes
+        landing-page: notes.qmd
+        type: notes
+        section-label: unit
+      - title: Labs
+        landing-page: labs.qmd
+        type: lab
+```
+
+This will write a file `scheduled-docs_files/sidebar-contents.yml` that will be formatted to create two sidebars: 1) A sidebar for the `Notes` section of the website with links to all of the docs with `type: notes` (separated into sections by the key `unit`) and 2) A sidebar for the `Labs` section of the website with links to all docs with `type: lab` (with no section separators).
+
+The three necessary keys for each item under `hybrid` are the `title` (which must match the title or `text` of a `navbar` item), a `landing-page` (which will appear as the first item in the sidebar contents), and a `type` of documents to appear in the sidebar.
+
+Hybrid navigation can be tricky to set up, so read the Quarto docs site carefully and add `debug: true` under your `scheduled-docs` key and inspect the files that get written to `scheduled-docs_files`.
 
 ### Schedule yaml file
 
