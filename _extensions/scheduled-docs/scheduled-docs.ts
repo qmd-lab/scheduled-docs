@@ -220,41 +220,69 @@ export async function writeListingContents(obj: any, tempFilesDir: string ) {
 // ------------------------------- //
 // Write the sidebar contents for all sets of docs with a defined group
 
-export async function writeSidebarContents(obj: any, tempFilesDir: string ) {
-  console.log("> Making sidebar contents files ...")
+export async function writeSidebarContents(obj: any, tempFilesDir: string) {
+  console.log("> Making sidebar contents files ...");
   
-  // use a `grouping-label` if defined, otherwise use `type`
+  // Use a `grouping-label` if defined, otherwise use `type`
   const type = obj['grouping-label'] ? obj['grouping-label'] : 'type';
   
-  // exit if not using a sidebar
-  if (obj?.autonav?.sidebar?.[type] === undefined ) {
+  // Exit if not using a sidebar
+  if (obj?.autonav?.sidebar?.type === undefined) {
     console.log("  - Sidebar autonav not being used.");
     return;
   }
-  
-  const sidebarSection = obj.autonav.sidebar[type];
 
-  // group documents by their type
-  const groupedDocs: Record<string, any[]> = {};
-  
+  // Get the sidebar type and section label
+  const sidebarConfig = obj.autonav.sidebar;
+  const sidebarType = sidebarConfig.type;
+  const sectionLabel = sidebarConfig['subsection-label'] || 'section';
+
+  // Group documents by their type and section
+  const groupedDocs: Record<string, Record<string, any[]>> = {};
+
   for (const doc of obj.doclist) {
     if (!doc[type] || !doc.href) {
       continue;
     }
-    const typeKey = doc[type].replace(" ", "-").toLowerCase();
+    const originalType = doc[type]; // Keep the original value of type
+    const originalSection = doc[sectionLabel] || "No Section"; // Keep the original value of section or default to "No Section"
+    
+    const typeKey = originalType.replace(" ", "-").toLowerCase();
+    const sectionKey = originalSection.replace(" ", "-").toLowerCase();
+
     if (!groupedDocs[typeKey]) {
-      groupedDocs[typeKey] = [];
+      groupedDocs[typeKey] = {};
     }
-    groupedDocs[typeKey].push({ href: `${doc.href}` });
+    if (!groupedDocs[typeKey][sectionKey]) {
+      groupedDocs[typeKey][sectionKey] = [];
+    }
+    groupedDocs[typeKey][sectionKey].push({ href: `${doc.href}`, originalSection });
   }
-  
-  // Process only the group that matches the sidebarSection
-  const typeKey = sidebarSection.replace(" ", "-").toLowerCase();
-  const items = groupedDocs[typeKey];
+
+  // Process only the group that matches the sidebar type
+  const items = groupedDocs[sidebarType.toLowerCase().replace(" ", "-")];
 
   if (!items) {
-    console.log("  - No matching group of docs found for ", sidebarSection);
+    console.log("  - No matching group of docs found for ", sidebarType);
     return;
+  }
+
+  // Build the contents structure
+  const sidebarContents: any[] = [];
+
+  if (items["no-section"]) {
+    // Add items without a section first
+    sidebarContents.push(...items["no-section"]);
+    delete items["no-section"];
+  }
+
+  for (const [sectionKey, docs] of Object.entries(items)) {
+    // Use the original section name for output
+    const originalSectionName = docs[0].originalSection;
+    sidebarContents.push({
+      section: originalSectionName,
+      contents: docs.map(doc => ({ href: doc.href }))
+    });
   }
 
   const yamlContent = {
@@ -262,9 +290,9 @@ export async function writeSidebarContents(obj: any, tempFilesDir: string ) {
       sidebar: {
         contents: [
           {
-            section: typeKey,
-            href: `${typeKey}.qmd`,
-            contents: items
+            section: sidebarType, // Use the original sidebar type
+            href: `${sidebarType}.qmd`,
+            contents: sidebarContents
           }
         ]
       }
@@ -276,7 +304,6 @@ export async function writeSidebarContents(obj: any, tempFilesDir: string ) {
   await Deno.writeTextFile(outputPath, stringify(yamlContent));
   console.log(`  - Created file: ${outputPath}`);
 }
-  
 
   
 // --------------------------------- //
