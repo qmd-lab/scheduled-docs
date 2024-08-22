@@ -13,7 +13,6 @@ website:
         
 metadata-files: 
   - scheduled-docs_files/draft-list.yml
-  - scheduled-docs_files/sidebar-contents.yml
         
 format:
   html:
