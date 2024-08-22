@@ -216,9 +216,9 @@ export async function writeListingContents(obj: any, tempFilesDir: string ) {
   
   
 // ------------------------------- //
-//     Write sidebar contents      //
+//     Write autonav contents      //
 // ------------------------------- //
-// Write the sidebar contents for all sets of docs with a defined group
+// Write the sidebar contents (sidebar or hybrid nav) for all sets of docs with a defined group
 
 export async function writeAutonavContents(obj: any, tempFilesDir: string) {
   
