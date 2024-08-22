@@ -220,22 +220,32 @@ export async function writeListingContents(obj: any, tempFilesDir: string ) {
 // ------------------------------- //
 // Write the sidebar contents for all sets of docs with a defined group
 
-export async function writeSidebarContents(obj: any, tempFilesDir: string) {
-  console.log("> Making sidebar contents files ...");
+export async function writeAutonavContents(obj: any, tempFilesDir: string) {
   
-  // Use a `grouping-label` if defined, otherwise use `type`
-  const type = obj['grouping-label'] ? obj['grouping-label'] : 'type';
+  // Exit if not using autonav
+  if (obj.autonav === undefined ) {
+    return;
+  } else {
+    console.log("> Making autonav contents files ...");
+  }
   
-  // Exit if not using a sidebar
-  if (obj?.autonav?.sidebar?.type === undefined) {
-    console.log("  - Sidebar autonav not being used.");
+  if (obj.autonav.sidebar !== undefined ) {
+    await writeSidebarContents(obj, tempFilesDir);
+  } else if (obj.autonav.hybrid !== undefined) {
+    await writeHybridContents(obj, tempFilesDir);
+  } else {
+    console.log("  - Neither hybrid or sidebar options found.");
     return;
   }
+}
 
-  // Get the sidebar type and section label
-  const sidebarConfig = obj.autonav.sidebar;
-  const sidebarType = sidebarConfig.type;
-  const sectionLabel = sidebarConfig['subsection-label'] || 'section';
+async function writeSidebarContents(obj: any, tempFilesDir: string) {
+  // Use a `grouping-label` if defined, otherwise use `type`
+  const type = obj['grouping-label'] ? obj['grouping-label'] : 'type';
+
+  // Get the sidebar type and subsection label
+  const sidebarType = obj.autonav.sidebar.type;
+  const sectionLabel = obj.autonav.sidebar['subsection-label'] || 'subtype';
 
   // Group documents by their type and section
   const groupedDocs: Record<string, Record<string, any[]>> = {};
