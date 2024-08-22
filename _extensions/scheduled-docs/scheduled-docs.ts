@@ -226,7 +226,7 @@ export async function writeAutonavContents(obj: any, tempFilesDir: string) {
   if (obj.autonav === undefined ) {
     return;
   } else {
-    console.log("> Making autonav contents files ...");
+    console.log("> Processing autonav options ...");
   }
   
   if (obj.autonav.sidebar !== undefined && obj.autonav.hybrid !== undefined) {
@@ -245,22 +245,24 @@ export async function writeAutonavContents(obj: any, tempFilesDir: string) {
 }
 
 async function writeSidebarContents(obj: any, tempFilesDir: string) {
-  // Use a `grouping-label` if defined, otherwise use `type`
+  console.log("  > Making sidebar contents files ...");
+  
+  // use a `grouping-label` if defined, otherwise use `type`
   const type = obj['grouping-label'] ? obj['grouping-label'] : 'type';
 
-  // Get the sidebar type and subsection label
+  // get the sidebar type and subsection label
   const sidebarType = obj.autonav.sidebar.type;
-  const sectionLabel = obj.autonav.sidebar['subsection-label'] || 'subtype';
+  const sectionLabel = obj.autonav.sidebar['section-label'] || 'subtype';
 
-  // Group documents by their type and section
+  // group documents by their type and section
   const groupedDocs: Record<string, Record<string, any[]>> = {};
 
   for (const doc of obj.doclist) {
     if (!doc[type] || !doc.href) {
       continue;
     }
-    const originalType = doc[type]; // Keep the original value of type
-    const originalSection = doc[sectionLabel] || "No Section"; // Keep the original value of section or default to "No Section"
+    const originalType = doc[type];
+    const originalSection = doc[sectionLabel] || "No Section";
     
     const typeKey = originalType.replace(" ", "-").toLowerCase();
     const sectionKey = originalSection.replace(" ", "-").toLowerCase();
@@ -274,25 +276,24 @@ async function writeSidebarContents(obj: any, tempFilesDir: string) {
     groupedDocs[typeKey][sectionKey].push({ href: `${doc.href}`, originalSection });
   }
 
-  // Process only the group that matches the sidebar type
+  // process only the group that matches the sidebar type
   const items = groupedDocs[sidebarType.toLowerCase().replace(" ", "-")];
 
   if (!items) {
-    console.log("  - No matching group of docs found for ", sidebarType);
+    console.log("    - No matching group of docs found for ", sidebarType);
     return;
   }
 
-  // Build the contents structure
+  // build the contents structure
   const sidebarContents: any[] = [];
 
   if (items["no-section"]) {
-    // Add items without a section first
+    // add items without a section first
     sidebarContents.push(...items["no-section"]);
     delete items["no-section"];
   }
 
   for (const [sectionKey, docs] of Object.entries(items)) {
-    // Use the original section name for output
     const originalSectionName = docs[0].originalSection;
     sidebarContents.push({
       section: originalSectionName,
@@ -305,7 +306,7 @@ async function writeSidebarContents(obj: any, tempFilesDir: string) {
       sidebar: {
         contents: [
           {
-            section: sidebarType, // Use the original sidebar type
+            section: sidebarType,
             href: `${sidebarType}.qmd`,
             contents: sidebarContents
           }
@@ -317,27 +318,30 @@ async function writeSidebarContents(obj: any, tempFilesDir: string) {
   const outputPath = join(Deno.cwd(), tempFilesDir, `sidebar-contents.yml`);
   await Deno.mkdir(tempFilesDir, { recursive: true });
   await Deno.writeTextFile(outputPath, stringify(yamlContent));
-  console.log(`  - Created file: ${outputPath}`);
+  console.log(`    - Created file: ${outputPath}`);
 }
 
 
 async function writeHybridContents(obj: any, tempFilesDir: string) {
-  console.log("> Making hybrid contents files ...");
+  console.log("  > Making hybrid contents files ...");
 
   // initialize sidebar contents
   const sidebarContents: any[] = [];
 
   // iterate over each hybrid config entry
   for (const hybridConfig of obj.autonav.hybrid) {
-    const type = hybridConfig.type;
+    // use a `grouping-label` if defined, otherwise use `type`
+    const typeLabel = obj['grouping-label'] ? obj['grouping-label'] : 'type';
+    
+    const type = hybridConfig[typeLabel];
     const landingPage = hybridConfig['landing-page'];
-    const sectionLabel = hybridConfig['subsection-label'] || null;
+    const sectionLabel = hybridConfig['section-label'] || null;
 
     // create a new sidebar item, copying all keys from hybridConfig
     const sidebarItem: any = { ...hybridConfig };
     delete sidebarItem.type;
     delete sidebarItem['landing-page'];
-    delete sidebarItem['subsection-label'];
+    delete sidebarItem['section-label'];
 
     // group documents by their type and section (if sectionLabel is defined)
     const groupedDocs: Record<string, any[]> = {};
@@ -394,7 +398,7 @@ async function writeHybridContents(obj: any, tempFilesDir: string) {
   const outputPath = join(Deno.cwd(), tempFilesDir, `sidebar-contents.yml`);
   await Deno.mkdir(tempFilesDir, { recursive: true });
   await Deno.writeTextFile(outputPath, stringify(yamlContent));
-  console.log(`  - Created file: ${outputPath}`);
+  console.log(`    - Created file: ${outputPath}`);
 }
 
 
