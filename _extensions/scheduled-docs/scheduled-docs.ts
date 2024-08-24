@@ -79,7 +79,7 @@ export function propagateKeys(obj: any, parentProps: Record<string, string> = {}
 // Set draft values for all items and collects them
 // into a doclist key in the config file
 
-export function setDraftStatus(obj, itemsKey: string = "docs") {
+export function setDraftStatuses(obj, itemsKey: string = "docs") {
   
   console.log("> Setting draft status of docs ...")
   const draftAfterStr = obj["draft-after"];
