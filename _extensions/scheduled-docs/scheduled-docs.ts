@@ -373,6 +373,7 @@ async function writeHybridContents(obj: any, tempFilesDir: string) {
 
     // create a new sidebar item, copying all keys from hybridConfig
     const sidebarItem: any = { ...hybridConfig };
+    sidebarItem.section = sidebarItem.title;
     delete sidebarItem.type;
     delete sidebarItem['landing-page'];
     delete sidebarItem['section-label'];
