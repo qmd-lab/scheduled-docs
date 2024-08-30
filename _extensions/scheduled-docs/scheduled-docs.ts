@@ -373,7 +373,6 @@ async function writeHybridContents(obj: any, tempFilesDir: string) {
 
     // create a new sidebar item, copying all keys from hybridConfig
     const sidebarItem: any = { ...hybridConfig };
-    sidebarItem.section = sidebarItem.title;
     delete sidebarItem.type;
     delete sidebarItem['landing-page'];
     delete sidebarItem['section-label'];
@@ -419,10 +418,16 @@ async function writeHybridContents(obj: any, tempFilesDir: string) {
       sectionContents.push(...groupedDocs['default'].contents);
     }
 
-    // add the original landing page and contents array to the sidebar item
-    sidebarItem.href = landingPage;
-    sidebarItem.contents = sectionContents;
-
+    // add the main landing page as the only top-level contents item and then
+    // next within it the sectionContents
+    sidebarItem.contents = [
+      {
+        section: sidebarItem.title,
+        href: landingPage,
+        contents: sectionContents
+      }
+    ];
+      
     // add this sidebar item to the final sidebar contents
     sidebarContents.push(sidebarItem);
   }
