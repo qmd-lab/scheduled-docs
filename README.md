@@ -184,6 +184,8 @@ The three necessary keys for each item under `hybrid` are the `title` (which mus
 
 Hybrid navigation can be tricky to set up, so read the Quarto docs site carefully and add `debug: true` under your `scheduled-docs` key and inspect the files that get written to `scheduled-docs_files`.
 
+To designate one of your docs to be the landing page for a section of the sidebar, add `section-landing-page: true` to that item.
+
 ### Schedule yaml file
 
 The structured description of the document schedule found in `_schedule.yml` is useful for automatically populating an html version of the schedule for display on a website. For that purpose, this extension writes a separate yaml file to `scheduled-docs_files/schedule.yml` that can be read into an EJS template. [Read the Quarto docs](https://quarto.org/docs/websites/website-listings-custom.html#metadata-file-listings) to learn more about populating an EJS template using a yaml file.
