@@ -24,16 +24,22 @@ scheduled-docs:
   timezone: "-07:00"
   docs:
     - href: "posts/post-1.qmd"
-      date: 1/1/24
+      date: "2024-01-02"
     - href: "posts/post-2.qmd"
-      date: 1/3/24
+      date: "2024-01-03"
 ```
 
 The three keys required under `scheduled-docs` are:
 
--   `draft-after`: can take values either `system-time` or a fixed date in MM/DD/YY format like `1/2/24`. All .qmd files under a `docs` key with a `date` that is in the future relative to `draft-after` will be set to `draft: true`.
+-   `draft-after`: can take values either `system-time` or a fixed date in YYYY-MM-DD format like `2024-01-02` (see below for using other date formats). All .qmd files under a `docs` key with a `date` that is in the future relative to `draft-after` will be set to `draft: true`.
 -   `timezone`: the offset from GMT in +/-hh:mm. Currently this does not adjust for daylight savings.
 -   `docs`: an array of items where each one contains at least an `href` and `date` key. There is considerable flexibility in how you can structure these arrays; see Things to Try number 5 and "Other features \> Schedule yaml file" for details.
+
+### Date formats
+
+By default, the extension assumes dates are formatted in the ISO 8601 standard `yyyy-MM-dd` format (e.g., `2024-08-03` is August 3, 2024). Because of the presence of `-`, this requires the dates be enclosed in quotation marks in the yml file(s).
+
+To use another format, one can set the `date-format` string in `config.yml`. For example, for the standard US format of dates such as `8/3/24`, one would set `date-format: 'M/d/yyyy'`. Note that that should be able to properly handle both four- and two-digit years (e.g., `2024` vs `24`) and one- and two-digit months and days, e.g., `08` and `8`. For a format using `/`, one should not need to enclose the dates in quotation marks in the yml file.
 
 ## Tutorial
 
@@ -47,7 +53,7 @@ quarto use template qmd-lab/scheduled-docs
 
 1.  Run `quarto preview` and see how only the first of three posts are visible on the site.
 
-2.  Set `draft-after: "1/4/24"` in `_schedule.yml` and re-render to see how now the first two of the three posts are visible.
+2.  Set `draft-after: "2024-01-04"` in `_schedule.yml` and re-render to see how now the first two of the three posts are visible.
 
 3.  Set `draft-after: "system-time"` in `_schedule.yml` and re-render to see how now all three documents are visible. This is because the system time on any computer now will be after 1/5/24.
 
@@ -56,12 +62,12 @@ quarto use template qmd-lab/scheduled-docs
     ``` yaml
     docs:
       - href: "posts/post-1.qmd"
-        date: 1/1/24
+        date: "2024-01-01"
       - href: "posts/post-2.qmd"
-        date: 1/3/24
+        date: "2024-01-03"
         draft: false
       - href: "posts/post-3.qmd"
-        date: 1/5/24
+        date: "2024-01-05"
     ```
 
     Re-render the site and observe that now posts 1 and 3 are rendered. This demonstrates that you can manually override the `draft-after` date by hard-coding a draft value of an item (either `true` or `false`).
@@ -77,10 +83,10 @@ This extension provides an additional method to specify the contents of a [docum
 ```         
 docs:
   - href: "posts/post-1.qmd"
-    date: 1/1/24
+    date: "2024-01-01"
     type: tutorial
   - href: "posts/post-2.qmd"
-    date: 1/3/24
+    date: "2024-01-03"
     type: tutorial
 ```
 

@@ -10,10 +10,15 @@ const scheduledDocsKey = configParams['scheduled-docs-key'];
 const itemsKey = configParams['docs-key'];
 const tempFilesDir = configParams['temp-files-dir'];
 
+let dateFormat = configParams['date-format'];
+if ( dateFormat === undefined ) {
+    dateFormat = "yyyy-MM-dd";
+}
+
 // Run functions
 let scheduledDocs = await readScheduledDocs(ymlPath, scheduledDocsKey, configParams);
 propagateKeys(scheduledDocs);
-setDraftStatuses(scheduledDocs, itemsKey);
+setDraftStatuses(scheduledDocs, itemsKey, dateFormat);
 await writeDraftList(scheduledDocs, tempFilesDir);
 await writeSchedule(scheduledDocs, tempFilesDir);
 await writeListingContents(scheduledDocs, tempFilesDir);
