@@ -13,7 +13,7 @@ const tempFilesDir = configParams['temp-files-dir'];
 // Run functions
 let scheduledDocs = await readScheduledDocs(ymlPath, scheduledDocsKey, configParams);
 propagateKeys(scheduledDocs);
-setDraftStatuses(scheduledDocs, itemsKey);
+setDraftStatuses(scheduledDocs, itemsKey, ymlPath);
 await writeDraftList(scheduledDocs, tempFilesDir);
 await writeSchedule(scheduledDocs, tempFilesDir);
 await writeListingContents(scheduledDocs, tempFilesDir);
