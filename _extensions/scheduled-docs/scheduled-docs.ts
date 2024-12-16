@@ -80,7 +80,7 @@ export function propagateKeys(obj: any, parentProps: Record<string, string> = {}
 // Set draft values for all items and collects them
 // into a doclist key in the config file
 
-export function setDraftStatuses(obj, itemsKey: string = "docs", dateFormat: string) {
+export function setDraftStatuses(obj, itemsKey: string = "docs", dateFormat: string, ymlPath: string) {
   
   console.log("> Setting draft status of docs ...")
   const draftAfterStr = obj["draft-after"];
@@ -147,6 +147,9 @@ export function setDraftStatuses(obj, itemsKey: string = "docs", dateFormat: str
   
   console.log(`  - ${nDrafts} docs set to 'draft: true'.`);
   console.log(`  - ${nNotDrafts} docs set to 'draft: false'.`);
+  if (nDrafts === 0) {
+     console.log(`  To dynamically publish documents based on date, set the 'draft-after' date in ${ymlPath}.`);
+  }
 
   //return config;
 }

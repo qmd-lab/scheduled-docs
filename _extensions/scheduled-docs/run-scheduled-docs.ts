@@ -18,7 +18,7 @@ if ( dateFormat === undefined ) {
 // Run functions
 let scheduledDocs = await readScheduledDocs(ymlPath, scheduledDocsKey, configParams);
 propagateKeys(scheduledDocs);
-setDraftStatuses(scheduledDocs, itemsKey, dateFormat);
+setDraftStatuses(scheduledDocs, itemsKey, dateFormat, ymlPath);
 await writeDraftList(scheduledDocs, tempFilesDir);
 await writeSchedule(scheduledDocs, tempFilesDir);
 await writeListingContents(scheduledDocs, tempFilesDir);
