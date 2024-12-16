@@ -2,6 +2,7 @@
 import { parse, stringify } from "https://deno.land/std/yaml/mod.ts";
 import { join } from "https://deno.land/std/path/mod.ts";
 import { existsSync } from "https://deno.land/std/fs/mod.ts";
+import { format, parse as parseDate } from "https://deno.land/std/datetime/mod.ts";
 
 
 // ---------------------- //
@@ -79,7 +80,7 @@ export function propagateKeys(obj: any, parentProps: Record<string, string> = {}
 // Set draft values for all items and collects them
 // into a doclist key in the config file
 
-export function setDraftStatuses(obj, itemsKey: string = "docs", ymlPath: string) {
+export function setDraftStatuses(obj, itemsKey: string = "docs", dateFormat: string, ymlPath: string) {
   
   console.log("> Setting draft status of docs ...")
   const draftAfterStr = obj["draft-after"];
@@ -89,7 +90,7 @@ export function setDraftStatuses(obj, itemsKey: string = "docs", ymlPath: string
   if (draftAfterStr === "system-time") {
       thresholdDate = new Date();
   } else {
-      thresholdDate = new Date(convertDateToISOFormat(draftAfterStr, timezone));
+      thresholdDate = new Date(convertDateToISOFormat(draftAfterStr, timezone, dateFormat));
   }
   
   let collectedItems = []
@@ -125,7 +126,7 @@ export function setDraftStatuses(obj, itemsKey: string = "docs", ymlPath: string
   function getDraftVal(item: any, thresholdDate: Date, timezone: string): boolean {
     // default to false
     let draftValue = false;
-    const itemDate = new Date(convertDateToISOFormat(item.date, timezone));
+    const itemDate = new Date(convertDateToISOFormat(item.date, timezone, dateFormat));
       
     // override if using draft-after
     if (itemDate > thresholdDate) {
@@ -491,9 +492,10 @@ export async function readConfig(): Promise<any> {
   return parsedYaml
 }
 
-function convertDateToISOFormat(dateStr: string, timezone: string): string {
-    const [month, day, year] = dateStr.split('/').map(num => num.padStart(2, '0'));
-    return `20${year}-${month}-${day}T00:00:00${timezone}`;
+function convertDateToISOFormat(dateStr: string, timezone: string, dateFormat: string): string {
+    // Convert to ISO format as a string.
+    const iso = format(parseDate(dateStr, dateFormat), 'yyyy-MM-dd');
+    return `${iso}T00:00:00${timezone}`;
 }
 
 function deepCopy(obj) {
